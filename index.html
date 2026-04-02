@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Financeiro Pessoal</title>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/SheetJS/0.18.5/xlsx.min.js"></script>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="container">
+
+<aside class="sidebar">
+<div class="logo">💰 Finance Pro</div>
+<ul>
+<li><button class="menu-btn active" data-page="dashboard">📊 Dashboard</button></li>
+<li><button class="menu-btn" data-page="resumo">📋 Resumo Executivo</button></li>
+<li><button class="menu-btn" data-page="transacoes">💳 Transações</button></li>
+<li><button class="menu-btn" data-page="metas">🎯 Metas</button></li>
+<li><button class="menu-btn" data-page="relatorios">📈 Relatórios</button></li>
+</ul>
+</aside>
+
+<main class="main">
+
+<!-- NOTIFICAÇÕES -->
+<div id="notificacoes" class="notificacoes"></div>
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="page">
+<div class="header">
+<h1>Dashboard Financeiro</h1>
+<div class="header-actions">
+<button class="btn btn-primary" id="addBtn">+ Nova Transação</button>
+<button class="btn btn-secondary" id="exportCSV" title="Export para CSV">📥 CSV</button>
+<button class="btn btn-secondary" id="exportPDF" title="Export para PDF">📥 PDF</button>
+<button class="btn btn-secondary" id="printBtn" title="Imprimir">🖨️ Print</button>
+</div>
+</div>
+
+<div class="cards">
+<div class="card card-success" data-tooltip="Total de todas as receitas acumuladas">
+<div class="card-icon">📈</div>
+<div class="card-content">
+<h3>Receita Total</h3>
+<p id="receita" class="value counter">R$ 0,00</p>
+<span class="card-change" id="receita-change">↗ +0%</span>
+</div>
+</div>
+
+<div class="card card-danger" data-tooltip="Total de todas as despesas acumuladas">
+<div class="card-icon">📉</div>
+<div class="card-content">
+<h3>Despesa Total</h3>
+<p id="despesa" class="value counter">R$ 0,00</p>
+<span class="card-change" id="despesa-change">↗ +0%</span>
+</div>
+</div>
+
+<div class="card card-info" data-tooltip="Diferença entre receitas e despesas">
+<div class="card-icon">⚖️</div>
+<div class="card-content">
+<h3>Saldo</h3>
+<p id="saldo" class="value counter">R$ 0,00</p>
+<span class="card-change" id="saldo-change">↗ +0%</span>
+</div>
+</div>
+
+<div class="card card-warning" data-tooltip="Média mensal calculada nos últimos 12 meses">
+<div class="card-icon">📊</div>
+<div class="card-content">
+<h3>Média Mensal</h3>
+<p id="media" class="value counter">R$ 0,00</p>
+<span class="card-change" id="media-change">↗ +0%</span>
+</div>
+</div>
+</div>
+
+<div class="charts-section">
+<div class="chart-container">
+<h3>Receitas vs Despesas (Últimos 12 meses)</h3>
+<div id="chartLinha"></div>
+</div>
+
+<div class="chart-container">
+<h3>Comparativo Mês a Mês 📊</h3>
+<div id="chartComparativo"></div>
+</div>
+
+<div class="chart-container">
+<h3>Despesas por Categoria</h3>
+<div id="chartCategoria"></div>
+</div>
+
+<div class="chart-container">
+<h3>Receitas por Categoria</h3>
+<div id="chartCategoriasReceita"></div>
+</div>
+
+<div class="chart-container">
+<h3>Distribuição das Despesas</h3>
+<div id="chartDespesasDistrib"></div>
+</div>
+</div>
+</section>
+
+<!-- RESUMO EXECUTIVO -->
+<section id="resumo" class="page hidden">
+<div class="header">
+<h1>Resumo Executivo</h1>
+<div class="header-actions">
+<button class="btn btn-secondary" id="printResumo">🖨️ Imprimir</button>
+</div>
+</div>
+
+<div class="resumo-grid">
+<div class="resumo-card">
+<h3>📊 Insights Principais</h3>
+<div id="resumoInsights" class="resumo-content">
+<!-- Conteúdo gerado dinamicamente -->
+</div>
+</div>
+
+<div class="resumo-card">
+<h3>📈 Tendências</h3>
+<div id="resumoTendencias" class="resumo-content">
+<!-- Conteúdo gerado dinamicamente -->
+</div>
+</div>
+
+<div class="resumo-card">
+<h3>⚠️ Alertas</h3>
+<div id="resumoAlertas" class="resumo-content">
+<!-- Conteúdo gerado dinamicamente -->
+</div>
+</div>
+
+<div class="resumo-card">
+<h3>🎯 Status das Metas</h3>
+<div id="resumoMetas" class="resumo-content">
+<!-- Conteúdo gerado dinamicamente -->
+</div>
+</div>
+</div>
+</section>
+<section id="transacoes" class="page hidden">
+<div class="header">
+<h1>Transações</h1>
+<button class="btn btn-primary" id="addBtn2">+ Nova Transação</button>
+</div>
+
+<div class="filters">
+<input type="search" id="searchTransacoes" placeholder="🔍 Buscar transação...">
+<select id="filterCategoria">
+<option value="">Todas as categorias</option>
+</select>
+<select id="filterTipo">
+<option value="">Todos os tipos</option>
+<option value="receita">Receita</option>
+<option value="despesa">Despesa</option>
+</select>
+<button class="btn btn-secondary" id="clearFilters">Limpar Filtros</button>
+</div>
+
+<table id="transacoesTable" class="table">
+<thead>
+<tr>
+<th>Data</th>
+<th>Descrição</th>
+<th>Categoria</th>
+<th>Tipo</th>
+<th>Valor</th>
+<th>Ações</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</section>
+
+<!-- METAS -->
+<section id="metas" class="page hidden">
+<div class="header">
+<h1>Metas Financeiras 🎯</h1>
+<button class="btn btn-primary" id="addMetaBtn">+ Nova Meta</button>
+</div>
+
+<div id="metasContainer" class="metas-grid">
+<!-- Conteúdo gerado dinamicamente -->
+</div>
+</section>
+<section id="relatorios" class="page hidden">
+<div class="header">
+<h1>Relatórios</h1>
+<div class="header-actions">
+<button class="btn btn-secondary" id="exportRelatorioCSV">📥 CSV</button>
+<button class="btn btn-secondary" id="exportRelatorioPDF">📥 PDF</button>
+<button class="btn btn-secondary" id="printRelatorio">🖨️ Print</button>
+</div>
+</div>
+
+<div class="relatorio-filtros">
+<div class="filtro-group">
+<label>Período:</label>
+<select id="tipoFiltro">
+<option value="mes">Por Mês</option>
+<option value="trimestre">Por Trimestre</option>
+<option value="semestre">Por Semestre</option>
+<option value="ano">Por Ano</option>
+<option value="customizado">Período Customizado</option>
+</select>
+</div>
+
+<div class="filtro-group">
+<label>Mês/Período:</label>
+<input type="month" id="filtroMes">
+</div>
+
+<div class="filtro-group hidden" id="filtroCustomizado">
+<label>De:</label>
+<input type="date" id="filtroDataInicio">
+<label>Até:</label>
+<input type="date" id="filtroDataFim">
+</div>
+
+<button class="btn btn-secondary" id="gerarRelatorio">🔄 Gerar Relatório</button>
+<button class="btn btn-secondary" id="compararPeriodos">📊 Comparar Períodos</button>
+</div>
+
+<div class="relatorio-content">
+<div class="relatorio-card">
+<h3>Receitas no Período</h3>
+<p id="totalReceitaPeriodo" class="relatorio-valor">R$ 0,00</p>
+<span class="relatorio-variacao" id="receitaVariacao">--</span>
+</div>
+
+<div class="relatorio-card">
+<h3>Despesas no Período</h3>
+<p id="totalDespesaPeriodo" class="relatorio-valor">R$ 0,00</p>
+<span class="relatorio-variacao" id="despesaVariacao">--</span>
+</div>
+
+<div class="relatorio-card">
+<h3>Saldo no Período</h3>
+<p id="totalSaldoPeriodo" class="relatorio-valor">R$ 0,00</p>
+<span class="relatorio-variacao" id="saldoVariacao">--</span>
+</div>
+
+<div class="relatorio-chart">
+<h3>Detalhamento de Despesas</h3>
+<div id="chartRelatorioDetalhes"></div>
+</div>
+
+<div class="relatorio-chart">
+<h3>Comparativo de Períodos</h3>
+<div id="chartComparativoPeriodos"></div>
+</div>
+</div>
+</section>
+
+</main>
+
+</div>
+
+<!-- MODAL DE TRANSAÇÃO -->
+<div id="modalTransacao" class="modal">
+<div class="modal-content">
+<div class="modal-header">
+<h2 id="modalTitle">Nova Transação</h2>
+<button class="close" id="closeModal">&times;</button>
+</div>
+
+<form id="formTransacao">
+<div class="form-group">
+<label>Tipo:</label>
+<div class="radio-group">
+<label><input type="radio" name="tipo" value="receita" required> Receita</label>
+<label><input type="radio" name="tipo" value="despesa" required> Despesa</label>
+</div>
+</div>
+
+<div class="form-group">
+<label>Data:</label>
+<input type="date" id="data" required>
+</div>
+
+<div class="form-group">
+<label>Descrição:</label>
+<input type="text" id="descricao" placeholder="Ex: Salário, Compras..." required>
+</div>
+
+<div class="form-group">
+<label>Categoria:</label>
+<select id="categoria" required>
+<option value="">Selecione uma categoria</option>
+</select>
+</div>
+
+<div class="form-group">
+<label>Valor:</label>
+<input type="number" id="valor" step="0.01" min="0" placeholder="0,00" required>
+</div>
+
+<div class="form-actions">
+<button type="submit" class="btn btn-primary">Salvar</button>
+<button type="button" class="btn btn-secondary" id="cancelBtn">Cancelar</button>
+<button type="button" class="btn btn-danger hidden" id="deleteBtn">Deletar</button>
+</div>
+
+<input type="hidden" id="transacaoId">
+</form>
+</div>
+</div>
+
+<!-- MODAL DE META -->
+<div id="modalMeta" class="modal">
+<div class="modal-content">
+<div class="modal-header">
+<h2 id="modalMetaTitle">Nova Meta</h2>
+<button class="close" id="closeModalMeta">&times;</button>
+</div>
+
+<form id="formMeta">
+<div class="form-group">
+<label>Categoria:</label>
+<select id="metaCategoria" required>
+<option value="">Selecione uma categoria</option>
+</select>
+</div>
+
+<div class="form-group">
+<label>Valor Limite (R$):</label>
+<input type="number" id="metaValor" step="0.01" min="0" placeholder="0,00" required>
+</div>
+
+<div class="form-group">
+<label>Período:</label>
+<select id="metaPeriodo" required>
+<option value="mensal">Mensal</option>
+<option value="trimestral">Trimestral</option>
+<option value="anual">Anual</option>
+</select>
+</div>
+
+<div class="form-group">
+<label>Descrição (opcional):</label>
+<input type="text" id="metaDescricao" placeholder="Ex: Reduzir gastos com alimentação">
+</div>
+
+<div class="form-actions">
+<button type="submit" class="btn btn-primary">Salvar Meta</button>
+<button type="button" class="btn btn-secondary" id="cancelMetaBtn">Cancelar</button>
+<button type="button" class="btn btn-danger hidden" id="deleteMetaBtn">Deletar</button>
+</div>
+
+<input type="hidden" id="metaId">
+</form>
+</div>
+</div>
+
+<script src="assets/js/financeData.js"></script>
+<script src="assets/js/app-v2.js"></script>
+<div class="card"><h3>Saldo</h3><p id="saldo"></p></div>
+<div class="card"><h3>Média</h3><p id="media"></p></div>
+</div>
+
+<div id="chartLinha" class="chart"></div>
+<div id="chartCategoria" class="chart"></div>
+<div id="chartSaldo" class="chart"></div>
+</section>
+
+<section id="relatorios" class="page hidden">
+<h1>Relatórios</h1>
+<p>Área preparada para relatórios futuros.</p>
+</section>
+
+<section id="categorias" class="page hidden">
+<h1>Categorias</h1>
+<p>Gestão de categorias (versão futura).</p>
+</section>
+
+<section id="config" class="page hidden">
+<h1>Configurações</h1>
+<p>Preferências do sistema.</p>
+</section>
+
+</main>
+</div>
+
+<div class="modal" id="modal">
+<div class="modal-content">
+<h3>Nova Transação</h3>
+<select id="type">
+<option value="receita">Receita</option>
+<option value="despesa">Despesa</option>
+</select>
+<input id="category" placeholder="Categoria">
+<input id="value" type="number" placeholder="Valor">
+<input id="date" type="month">
+<button class="primary" id="save">Salvar</button>
+</div>
+</div>
+
+<script>
+let transactions=[
+{date:"2025-01",type:"receita",category:"Salário",value:4500},
+{date:"2025-01",type:"despesa",category:"Moradia",value:1500},
+{date:"2025-02",type:"receita",category:"Salário",value:4500},
+{date:"2025-02",type:"despesa",category:"Alimentação",value:900},
+{date:"2025-03",type:"receita",category:"Freelance",value:1200},
+{date:"2025-03",type:"despesa",category:"Transporte",value:400}
+];
+
+let charts={};
+
+function calcularKPIs(){
+let receita=0,despesa=0;
+transactions.forEach(t=>{
+if(t.type==='receita')receita+=t.value;
+else despesa+=t.value;
+});
+const saldo=receita-despesa;
+const media=saldo/12;
+document.getElementById('receita').innerText='R$ '+receita.toFixed(2);
+document.getElementById('despesa').innerText='R$ '+despesa.toFixed(2);
+document.getElementById('saldo').innerText='R$ '+saldo.toFixed(2);
+document.getElementById('media').innerText='R$ '+media.toFixed(2);
+}
+
+function renderCharts(){
+Object.values(charts).forEach(c=>c.destroy&&c.destroy());
+
+const meses=[...new Set(transactions.map(d=>d.date))];
+
+const receitas=meses.map(m=>transactions.filter(d=>d.date===m&&d.type==='receita').reduce((a,v)=>a+v.value,0));
+const despesas=meses.map(m=>transactions.filter(d=>d.date===m&&d.type==='despesa').reduce((a,v)=>a+v.value,0));
+
+charts.linha=new ApexCharts(document.querySelector('#chartLinha'),{
+chart:{type:'line',height:300},
+series:[{name:'Receitas',data:receitas},{name:'Despesas',data:despesas}],
+xaxis:{categories:meses}
+});
+charts.linha.render();
+
+const cat={};
+transactions.filter(d=>d.type==='despesa').forEach(d=>{
+cat[d.category]=(cat[d.category]||0)+d.value;
+});
+
+charts.categoria=new ApexCharts(document.querySelector('#chartCategoria'),{
+chart:{type:'donut'},
+series:Object.values(cat),
+labels:Object.keys(cat)
+});
+charts.categoria.render();
+
+let saldo=0;
+const acumulado=meses.map(m=>{
+transactions.filter(d=>d.date===m).forEach(d=>{
+saldo+=d.type==='receita'?d.value:-d.value;
+});
+return saldo;
+});
+
+charts.saldo=new ApexCharts(document.querySelector('#chartSaldo'),{
+chart:{type:'area',height:300},
+series:[{name:'Saldo acumulado',data:acumulado}],
+xaxis:{categories:meses}
+});
+charts.saldo.render();
+}
+
+function refresh(){
+calcularKPIs();
+renderCharts();
+}
+
+refresh();
+
+// SPA NAVIGATION
+
+document.querySelectorAll('.menu-btn').forEach(btn=>{
+btn.addEventListener('click',()=>{
+document.querySelectorAll('.menu-btn').forEach(b=>b.classList.remove('active'));
+btn.classList.add('active');
+const page=btn.dataset.page;
+document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+document.getElementById(page).classList.remove('hidden');
+});
+});
+
+// MODAL
+const modal=document.getElementById('modal');
+
+document.getElementById('addBtn').onclick=()=>modal.style.display='flex';
+
+modal.onclick=e=>{if(e.target===modal)modal.style.display='none'};
+
+// ADD TRANSACTION
+
+document.getElementById('save').onclick=()=>{
+transactions.push({
+date:document.getElementById('date').value,
+type:document.getElementById('type').value,
+category:document.getElementById('category').value,
+value:Number(document.getElementById('value').value)
+});
+modal.style.display='none';
+refresh();
+};
+</script>
+
+</body>
+</html>
