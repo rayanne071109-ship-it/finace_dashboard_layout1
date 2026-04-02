@@ -6,6 +6,9 @@ Este projeto demonstra um fluxo completo moderno de desenvolvimento:
 
 > **Desenvolvimento → Versionamento → Containerização → Deploy → Acesso Web**
 
+## 🧭 Arquitetura e Fluxo de Deploy
+
+![Deployment Workflow](assets/images/deployment-flow.png)
 ---
 
 ## 🚀 Live Demo
