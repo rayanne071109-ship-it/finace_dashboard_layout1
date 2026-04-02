@@ -8,7 +8,6 @@ Este projeto demonstra um fluxo completo moderno de desenvolvimento:
 
 ## 🧭 Arquitetura e Fluxo de Deploy
 
-![Fluxo do Deploy](assets/assets/images/image.png)
 ---
 
 ## 🚀 Live Demo
@@ -20,12 +19,7 @@ https://rayanne071109-ship-it.github.io/finace_dashboard_layout1/
 
 ## 📸 Preview
 
-*(adicione aqui depois um print do dashboard)*
-
-```
-assets/images/dashboard-preview.png
-```
-
+![Fluxo do Deploy](assets/assets/images/image.png)
 ---
 
 ## 🎯 Objetivo do Projeto
