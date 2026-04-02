@@ -8,7 +8,7 @@ Este projeto demonstra um fluxo completo moderno de desenvolvimento:
 
 ## 🧭 Arquitetura e Fluxo de Deploy
 
-![Deployment Workflow](assets/images/deployment-flow.png)
+![Deployment Workflow](assets/images.png)
 ---
 
 ## 🚀 Live Demo
